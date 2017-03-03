@@ -26,6 +26,7 @@ module.exports = {
         let returnDate = moment(departureDate).add(route.durationDays, 'd').format('YYYY-MM-DD')
 
         let params = {
+          route: route._id,
           origin: route.departureAirport,
           destination: route.arrivalAirport,
           departure_date: departureDate,

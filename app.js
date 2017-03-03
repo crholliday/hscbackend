@@ -9,8 +9,6 @@ const config        = require('./config'),
       bunyanWinston = require('bunyan-winston-adapter'),
       mongoose      = require('mongoose')
 
-let agenda 	= require('./agenda')
-
 /**
  * Logging
  */
@@ -55,14 +53,12 @@ server.on('uncaughtException', (req, res, route, err) => {
  * Lift Server, Connect to DB & Bind Routes
  */
 server.listen(config.port, function() {
-
     mongoose.connection.on('error', function(err) {
         log.error('Mongoose default connection error: ' + err)
         process.exit(1)
     })
 
     mongoose.connection.on('open', function(err) {
-
         if (err) {
             log.error('Mongoose default connection error: ' + err)
             process.exit(1)
