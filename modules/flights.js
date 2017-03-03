@@ -32,7 +32,7 @@ module.exports = {
           departure_date: departureDate,
           return_date: returnDate,
           apikey: apiKey,
-          number_of_results: 3
+          number_of_results: 5
         }
 
         let reqConfig = {
