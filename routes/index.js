@@ -11,7 +11,9 @@ const _ = require('lodash'),
  */
 const Todo = require('../models/todo')
 const TravelRoute = require('../models/travelRoute')
+const Flights = require('../models/flight')
 let flights = require('../modules/flights')
+
 
 /**
  * GET covers the root
@@ -74,21 +76,6 @@ server.post('/flight', function (req, res, next) {
     flights.loadFlights()
     res.send('Flights loaded...', 201)
     next()
-
-/*    let data = req.body || {}
-
-    let flight = new Flight(data)
-    flight.save(function (err) {
-
-        if (err) {
-            log.error(err)
-            return next(new errors.InternalError(err.message))
-            next()
-        }
-
-        res.send(201)
-        next()
-    })*/
 })
 
 
@@ -104,6 +91,36 @@ server.get('/todos', function (req, res, next) {
         res.send(docs)
         next()
     })
+})
+
+/**
+ * LIST
+ */
+server.get('/cheap-flights', function (req, res, next) {
+
+    Flights.aggregate([
+        {$match: {'route': {$ne: null}}},
+        /*{$group: {_id: 'null', total_price: {$min: '$fare.total_price'}}},*/
+        {$project: {
+                _id: 0,
+                route: 1,
+                departure_date: 1,
+                return_date: 1,
+                'fare.total_price': 1
+            }
+        },
+        {
+            $sort: {'fare.total_price': 1}
+        }],
+        function (err, docs) {
+            if (err) {
+                log.error(err)
+                return next(new errors.InvalidContentError(err.errors.name.message))
+            }
+            res.send(docs)
+            next()
+        }
+    )
 })
 
 

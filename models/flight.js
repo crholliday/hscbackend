@@ -16,7 +16,7 @@ const FlightSchema = new mongoose.Schema({
     },
     fare: {
         total_price: {
-            type: String
+            type: Number
         }
     },
     itineraries: [{
