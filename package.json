@@ -16,7 +16,7 @@
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
     "momentjs": "^2.0.0",
-    "mongoose": "*",
+    "mongoose": "^4.8.5",
     "mongoose-api-query": "^0.1.1-pre",
     "mongoose-createdmodified": "0.0.2",
     "path": "^0.12.7",

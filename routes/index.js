@@ -4,7 +4,8 @@
  * Module Dependencies
  */
 const _ = require('lodash'),
-    errors = require('restify-errors')
+    errors = require('restify-errors'),
+    mongoose = require('mongoose')
 
 /**
  * Model Schema
@@ -98,29 +99,40 @@ server.get('/todos', function (req, res, next) {
  */
 server.get('/cheap-flights', function (req, res, next) {
 
-    Flights.aggregate([
-        {$match: {'route': {$ne: null}}},
-        /*{$group: {_id: 'null', total_price: {$min: '$fare.total_price'}}},*/
-        {$project: {
-                _id: 0,
-                route: 1,
-                departure_date: 1,
-                return_date: 1,
-                'fare.total_price': 1
+    Flights.aggregate(
+        {$group: {
+                _id: {
+                    route: '$route',
+                    departure_date: '$departure_date',
+                    return_date: '$return_date'
+                },
+                total_price: {$min: '$fare.total_price'}
             }
         },
-        {
-            $sort: {'fare.total_price': 1}
-        }],
-        function (err, docs) {
+        {$lookup: {
+            from: 'travelroutes',
+            localField: '_id.route',
+            foreignField: '_id',
+            as: 'routes'
+        }},
+        {$unwind: '$routes'},
+        {$project: {
+            departureAirport: '$routes.departureAirport',
+            arrivalAirport: '$routes.arrivalAirport',
+            departureDate: '$_id.departure_date',
+            returnDate: '$_id.return_date',
+            'total_price': 1,
+            '_id': 0
+        }},
+        {$sort: {'total_price': 1}},
+        function(err, cheapFlights){
             if (err) {
                 log.error(err)
                 return next(new errors.InvalidContentError(err.errors.name.message))
             }
-            res.send(docs)
+            res.send(cheapFlights)
             next()
-        }
-    )
+        })
 })
 
 
