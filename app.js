@@ -7,7 +7,8 @@ const config        = require('./config'),
       restify       = require('restify'),
       winston       = require('winston'),
       bunyanWinston = require('bunyan-winston-adapter'),
-      mongoose      = require('mongoose')
+      mongoose      = require('mongoose'),
+      agenda        = require('agenda')
 
 /**
  * Logging
