@@ -18,7 +18,7 @@ module.exports = {
   loadFlights: function () {
 
     TravelRoutes.find({isActive: true}, function (err, routes) {
-      log.info('Picked up Travel Routes...')
+      log.info('Picked up ' + routes.length + ' Travel Routes...')
 
       routes.forEach(function (route) {
 
