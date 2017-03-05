@@ -114,13 +114,15 @@ server.get('/todos', function (req, res, next) {
 server.get('/cheap-flights', function (req, res, next) {
 
     Flights.aggregate(
+        {$sort: {'fare.total_price': 1}},
         {$group: {
                 _id: {
                     route: '$route',
                     departure_date: '$departure_date',
                     return_date: '$return_date'
                 },
-                total_price: {$min: '$fare.total_price'}
+                total_price: {$min: '$fare.total_price'},
+                doc: {$first: '$$ROOT'}
             }
         },
         {$lookup: {
@@ -135,11 +137,18 @@ server.get('/cheap-flights', function (req, res, next) {
             arrivalAirport: '$routes.arrivalAirport',
             departureDate: '$_id.departure_date',
             returnDate: '$_id.return_date',
-            'total_price': 1,
+            'price': '$total_price',
             'routeID': '$_id.route',
+            'docFlightID': '$doc._id',
+            'docCreated': '$doc.created',
             '_id': 0
         }},
-        {$sort: {'total_price': 1}},
+        {$sort: {
+            'departureAirport': 1,
+            'arrivalAirport': 1,
+            'cheap_price': 1,
+            'departureDate': -1}
+        },
         function(err, cheapFlights){
             if (err) {
                 log.error(err)
