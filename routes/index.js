@@ -122,6 +122,7 @@ server.get('/cheap-flights', function (req, res, next) {
             departureDate: '$_id.departure_date',
             returnDate: '$_id.return_date',
             'total_price': 1,
+            'routeID': '$_id.route',
             '_id': 0
         }},
         {$sort: {'total_price': 1}},
