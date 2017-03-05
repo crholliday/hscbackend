@@ -49,6 +49,20 @@ server.post('/todos', function (req, res, next) {
 })
 
 /**
+ * List Travel Routes
+ */
+server.get('/travel-routes', function (req, res, next) {
+    TravelRoute.apiQuery(req.params, function (err, docs) {
+        if (err) {
+            log.error(err)
+            return next(new errors.InvalidContentError(err.errors.name.message))
+        }
+        res.send(docs)
+        next()
+    })
+})
+
+/**
  * POST Travel Route
  */
 server.post('/travel-route', function (req, res, next) {
