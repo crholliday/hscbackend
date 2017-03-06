@@ -141,6 +141,7 @@ server.get('/cheap-flights', function (req, res, next) {
             'routeID': '$_id.route',
             'docFlightID': '$doc._id',
             'docCreated': '$doc.created',
+            'doc': 1,
             '_id': 0
         }},
         {$sort: {
