@@ -13,6 +13,7 @@ const _ = require('lodash'),
 const Todo = require('../models/todo')
 const TravelRoute = require('../models/travelRoute')
 const Flights = require('../models/flight')
+const Airlines = require('../models/airlines')
 let flights = require('../modules/flights')
 
 
@@ -109,6 +110,28 @@ server.get('/todos', function (req, res, next) {
 })
 
 /**
+ * GET Airline by IATA
+ */
+server.get('/airlines/:iata', function (req, res, next) {
+
+    Airlines.findOne({IATA: req.params.iata}, function (err, doc) {
+
+        if (err) {
+            log.error(err)
+            return next(new errors.InvalidContentError(err.errors.name.message))
+        }
+        if (res && doc) {
+            res.send(doc)
+            next()
+        } else {
+            res.send('')
+            next()
+        }
+    })
+
+})
+
+/**
  * LIST
  */
 server.get('/cheap-flights', function (req, res, next) {
@@ -117,9 +140,9 @@ server.get('/cheap-flights', function (req, res, next) {
         {$sort: {'fare.total_price': 1}},
         {$group: {
                 _id: {
-                    route: '$route',
-                    departure_date: '$departure_date',
-                    return_date: '$return_date'
+                    route: '$route'
+                    //departure_date: '$departure_date',
+                    //return_date: '$return_date'
                 },
                 total_price: {$min: '$fare.total_price'},
                 doc: {$first: '$$ROOT'}
@@ -132,15 +155,20 @@ server.get('/cheap-flights', function (req, res, next) {
             as: 'routes'
         }},
         {$unwind: '$routes'},
+        {$unwind: '$doc.itineraries'},
         {$project: {
             departureAirport: '$routes.departureAirport',
             arrivalAirport: '$routes.arrivalAirport',
-            departureDate: '$_id.departure_date',
-            returnDate: '$_id.return_date',
+            departureDate: '$doc.departure_date',
+            returnDate: '$doc.return_date',
             'price': '$total_price',
             'routeID': '$_id.route',
             'docFlightID': '$doc._id',
             'docCreated': '$doc.created',
+            'departureFirstFlight': {$arrayElemAt: ['$doc.itineraries.outbound.flights', 0]},
+            'departureLastFlight': {$arrayElemAt: ['$doc.itineraries.outbound.flights', -1]},
+            'returnFirstFlight': {$arrayElemAt: ['$doc.itineraries.inbound.flights', 0]},
+            'returnLastFlight': {$arrayElemAt: ['$doc.itineraries.inbound.flights', -1]},
             'doc': 1,
             '_id': 0
         }},

@@ -52,8 +52,8 @@ const FlightSchema = new mongoose.Schema({
                 destination: {
                     airport: {type: String}
                 },
-                marketingAirline: {type: String},
-                operatingAirline: {type: String},
+                marketing_airline: {type: String},
+                operating_airline: {type: String},
                 flight_number: {type: String},
                 booking_info: {
                     travel_class: {type: String},
