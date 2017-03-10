@@ -110,6 +110,20 @@ server.get('/todos', function (req, res, next) {
 })
 
 /**
+ * List all airlines
+ */
+server.get('/airlines', function (req, res, next) {
+    Airlines.find({}, function (err, docs) {
+        if (err) {
+            log.error(err)
+            return next(new errors.InvalidContentError(err.errors.name.message))
+        }
+        res.send(docs)
+        next()
+    })
+})
+
+/**
  * GET Airline by IATA
  */
 server.get('/airlines/:iata', function (req, res, next) {
@@ -141,8 +155,6 @@ server.get('/cheap-flights', function (req, res, next) {
         {$group: {
                 _id: {
                     route: '$route'
-                    //departure_date: '$departure_date',
-                    //return_date: '$return_date'
                 },
                 total_price: {$min: '$fare.total_price'},
                 doc: {$first: '$$ROOT'}

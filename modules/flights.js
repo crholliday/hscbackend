@@ -9,7 +9,6 @@ let moment = require('moment')
 let Flight = require('../models/flight')
 let TravelRoutes = require('../models/travelRoute')
 
-
 const apiKey = config.flight_search.api_key
 const baseURL = config.flight_search.base_url
 
@@ -40,6 +39,8 @@ module.exports = {
           params: params,
         }
 
+        let flight = {}
+
         axios.request(reqConfig)
           .then(function (response) {
             // console.log(flat(response.data))
@@ -52,10 +53,10 @@ module.exports = {
 
         function loadRoutes(data) {
           let flights = data.results
-          /*console.log(flat(flights))*/
           for (let i in flights) {
             log.info('Iterating through results...')
-            let flight = _.merge(flights[i], params)
+            flight = _.merge(flights[i], params)
+            console.log(flight)
 
             /*console.log(flat(flight))*/
             let newFlight = new Flight(flight)
