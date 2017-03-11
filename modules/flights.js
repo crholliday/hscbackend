@@ -55,11 +55,11 @@ module.exports = {
           let flights = data.results
           for (let i in flights) {
             log.info('Iterating through results...')
-            flight = _.merge(flights[i], params)
-            console.log(flight)
 
-            /*console.log(flat(flight))*/
+            flight = _.merge(flights[i], params)
+
             let newFlight = new Flight(flight)
+            
             newFlight.save(function (err) {
               if (err) {
                 log.error(err)
