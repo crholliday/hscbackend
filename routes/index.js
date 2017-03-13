@@ -200,6 +200,36 @@ server.get('/cheap-flights', function (req, res, next) {
         })
 })
 
+/**
+ * LIST
+ */
+server.get('/distinct_routes', function (req, res, next) {
+
+    TravelRoute.aggregate(
+        {$match: {isActive: true}},
+        {$group: {
+                _id: {
+                    departure: '$departureAirport',
+                    arrival: '$arrivalAirport'
+                }
+            }
+        },
+        {$project: {
+            departureAirport: '$_id.departure',
+            arrivalAirport: '$_id.arrival',
+            '_id': 0
+        }},
+        function(err, travelRoutes){
+            if (err) {
+                log.error(err)
+                return next(new errors.InvalidContentError(err.errors.name.message))
+            }
+            res.send(travelRoutes)
+            next()
+        })
+})
+
+
 
 /**
  * GET
