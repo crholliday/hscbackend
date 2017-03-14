@@ -11,11 +11,14 @@ const _ = require('lodash'),
  * Model Schema
  */
 const Todo = require('../models/todo')
-const TravelRoute = require('../models/travelRoute')
-const Flights = require('../models/flight')
-const Airlines = require('../models/airlines')
-let flights = require('../modules/flights')
 
+/**
+ * Bring in other routes
+ */
+
+require('../routes/travelroutes.js')(server)
+require('../routes/airlines.js')(server)
+require('../routes/flights')(server)
 
 /**
  * GET covers the root
@@ -50,52 +53,6 @@ server.post('/todos', function (req, res, next) {
 })
 
 /**
- * List Travel Routes
- */
-server.get('/travel-routes', function (req, res, next) {
-    TravelRoute.apiQuery(req.params, function (err, docs) {
-        if (err) {
-            log.error(err)
-            return next(new errors.InvalidContentError(err.errors.name.message))
-        }
-        res.send(docs)
-        next()
-    })
-})
-
-/**
- * POST Travel Route
- */
-server.post('/travel-route', function (req, res, next) {
-
-    let data = req.body || {}
-
-    let travelRoute = new TravelRoute(data)
-    travelRoute.save(function (err) {
-
-        if (err) {
-            log.error(err)
-            return next(new errors.InternalError(err.message))
-            next()
-        }
-
-        res.send(201)
-        next()
-    })
-})
-
-/**
- * POST Flight Route
- */
-server.post('/flight', function (req, res, next) {
-
-    flights.loadFlights()
-    res.send('Flights loaded...', 201)
-    next()
-})
-
-
-/**
  * LIST
  */
 server.get('/todos', function (req, res, next) {
@@ -108,128 +65,6 @@ server.get('/todos', function (req, res, next) {
         next()
     })
 })
-
-/**
- * List all airlines
- */
-server.get('/airlines', function (req, res, next) {
-    Airlines.find({}, function (err, docs) {
-        if (err) {
-            log.error(err)
-            return next(new errors.InvalidContentError(err.errors.name.message))
-        }
-        res.send(docs)
-        next()
-    })
-})
-
-/**
- * GET Airline by IATA
- */
-server.get('/airlines/:iata', function (req, res, next) {
-
-    Airlines.findOne({IATA: req.params.iata}, function (err, doc) {
-
-        if (err) {
-            log.error(err)
-            return next(new errors.InvalidContentError(err.errors.name.message))
-        }
-        if (res && doc) {
-            res.send(doc)
-            next()
-        } else {
-            res.send('')
-            next()
-        }
-    })
-
-})
-
-/**
- * LIST
- */
-server.get('/cheap-flights', function (req, res, next) {
-
-    Flights.aggregate(
-        {$sort: {'fare.total_price': 1}},
-        {$group: {
-                _id: {
-                    route: '$route'
-                },
-                total_price: {$min: '$fare.total_price'},
-                doc: {$first: '$$ROOT'}
-            }
-        },
-        {$lookup: {
-            from: 'travelroutes',
-            localField: '_id.route',
-            foreignField: '_id',
-            as: 'routes'
-        }},
-        {$unwind: '$routes'},
-        {$unwind: '$doc.itineraries'},
-        {$project: {
-            departureAirport: '$routes.departureAirport',
-            arrivalAirport: '$routes.arrivalAirport',
-            departureDate: '$doc.departure_date',
-            returnDate: '$doc.return_date',
-            'price': '$total_price',
-            'routeID': '$_id.route',
-            'docFlightID': '$doc._id',
-            'docCreated': '$doc.created',
-            'departureFirstFlight': {$arrayElemAt: ['$doc.itineraries.outbound.flights', 0]},
-            'departureLastFlight': {$arrayElemAt: ['$doc.itineraries.outbound.flights', -1]},
-            'returnFirstFlight': {$arrayElemAt: ['$doc.itineraries.inbound.flights', 0]},
-            'returnLastFlight': {$arrayElemAt: ['$doc.itineraries.inbound.flights', -1]},
-            'doc': 1,
-            '_id': 0
-        }},
-        {$sort: {
-            'departureAirport': 1,
-            'arrivalAirport': 1,
-            'cheap_price': 1,
-            'departureDate': -1}
-        },
-        function(err, cheapFlights){
-            if (err) {
-                log.error(err)
-                return next(new errors.InvalidContentError(err.errors.name.message))
-            }
-            res.send(cheapFlights)
-            next()
-        })
-})
-
-/**
- * LIST
- */
-server.get('/distinct_routes', function (req, res, next) {
-
-    TravelRoute.aggregate(
-        {$match: {isActive: true}},
-        {$group: {
-                _id: {
-                    departure: '$departureAirport',
-                    arrival: '$arrivalAirport'
-                }
-            }
-        },
-        {$project: {
-            departureAirport: '$_id.departure',
-            arrivalAirport: '$_id.arrival',
-            '_id': 0
-        }},
-        function(err, travelRoutes){
-            if (err) {
-                log.error(err)
-                return next(new errors.InvalidContentError(err.errors.name.message))
-            }
-            res.send(travelRoutes)
-            next()
-        })
-})
-
-
 
 /**
  * GET
