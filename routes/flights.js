@@ -24,8 +24,54 @@ module.exports = function (server) {
         next()
     })
 
+     /**
+     * LIST
+     */
+    server.get('/cheap-flights-by-day', function (req, res, next) {
 
-    /**
+        Flights.aggregate(
+            {$lookup: {
+                from: 'travelroutes',
+                localField: 'route',
+                foreignField: '_id',
+                as: 'routes'
+            }},
+            {$group: {
+                    _id: {
+                        departureAirport: '$routes.departureAirport',
+                        arrivalAirport: '$routes.arrivalAirport',
+                        year: {$year: '$created'},
+                        month: {$month: '$created'},
+                        day: {$dayOfMonth: '$created'}
+                    },
+                    total_price: {$min: '$fare.total_price'},
+                    created: {$first: '$created'}
+                }
+            },
+            {$project: {
+                departureAirport: {$arrayElemAt: ['$_id.departureAirport', 0]},
+                arrivalAirport: {$arrayElemAt: ['$_id.arrivalAirport', 0]},
+                created : '$created',
+                price: '$total_price',
+                '_id': 0
+            }},
+            {$sort: {
+                'created': 1,
+                'departureAirport': 1,
+                'arrivalAirport': 1
+            }
+        },
+        function(err, cheapFlights){
+            if (err) {
+                log.error(err)
+                return next(new errors.InvalidContentError(err.errors.name.message))
+            }
+            res.send(cheapFlights)
+            next()
+        })
+    })
+
+     /**
      * LIST
      */
     server.get('/cheap-flights', function (req, res, next) {
