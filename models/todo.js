@@ -11,7 +11,7 @@ const TodoSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    reference: {
+    category: {
         type: String,
         required: true,
         trim: true,
