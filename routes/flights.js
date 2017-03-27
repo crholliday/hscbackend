@@ -120,6 +120,33 @@ module.exports = function (server) {
         })
     })
 
+    /**
+     * LIST
+     */
+    server.get('/flights-stats', function (req, res, next) {
+       Flights.aggregate(
+            {$sort: {'created': -1}},
+            {$group: {
+                    _id: null,
+                    record_cound: {$sum: 1},
+                    latest_date: {$first: '$created'}
+                }
+            },
+            {$project: {
+                'recordCount': '$record_cound',
+                'latestDate': '$latest_date',
+                _id: 0
+            }},
+            function(err, cheapFlights){
+                if (err) {
+                    log.error(err)
+                    return next(new errors.InvalidContentError(err.errors.name.message))
+                }
+                res.send(cheapFlights[0])
+                next()
+            })
+    })
+
      /**
      * LIST
      */
