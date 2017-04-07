@@ -73,6 +73,58 @@ module.exports = function (server) {
         })
     })
 
+     /**
+     * LIST
+     * Requires an 'origin' and 'destination' parameter
+     */
+    server.get('/flights-by-endpoints', function (req, res, next) {
+
+        Flights.aggregate(
+            {$lookup: {
+                from: 'travelroutes',
+                localField: 'route',
+                foreignField: '_id',
+                as: 'routes'
+            }},
+            {$match: {
+                'routes.departureAirport': req.query.origin,
+                'routes.arrivalAirport': req.query.destination
+            }},
+            {$group: {
+                    _id: {
+                        year: {$year: '$created'},
+                        month: {$month: '$created'},
+                        day: {$dayOfMonth: '$created'}
+                    },
+                    avg_price: {$avg: '$fare.total_price'},
+                    created: {$first: '$created'},
+                    departureAirport: {$first: '$routes.departureAirport'},
+                    arrivalAirport: {$first: '$routes.arrivalAirport'}
+                }
+            },
+            {$project: {
+                departureAirport: {$arrayElemAt: ['$departureAirport', 0]},
+                arrivalAirport: {$arrayElemAt: ['$arrivalAirport', 0]},
+                created : '$created',
+                price: '$avg_price',
+                '_id': 0
+            }},
+            {$sort: {
+                'created': 1,
+                'departureAirport': 1,
+                'arrivalAirport': 1
+            }
+        },
+        function(err, cheapFlights){
+            if (err) {
+                log.error(err)
+                return next(new errors.InvalidContentError(err.errors.name.message))
+            }
+            res.send(cheapFlights)
+            next()
+        })
+    })
+
     /**
      * LIST
      */

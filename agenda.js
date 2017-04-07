@@ -26,6 +26,7 @@ agenda.define('loadFlights', function(job, done) {
 	try {
 
         flights.loadFlights()
+		done()
 
 	} catch (error) {
 		logger.error('Job running exception!')
