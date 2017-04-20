@@ -8,6 +8,7 @@ const config        = require('./config'),
       winston       = require('winston'),
       bunyanWinston = require('bunyan-winston-adapter'),
       mongoose      = require('mongoose'),
+      passport      = require('passport-restify'),
       agenda        = require('./agenda')
 
 /**
@@ -41,6 +42,7 @@ server.use(restify.jsonBodyParser({mapParams: true}))
 server.use(restify.acceptParser(server.acceptable))
 server.use(restify.queryParser({mapParams: true}))
 server.use(restify.fullResponse())
+server.use(passport.initialize())
 
 /**
  * Error Handling

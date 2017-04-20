@@ -22,9 +22,12 @@ const TodoSchema = new mongoose.Schema({
         max: 10,
         required: [true, 'Must be between 1 - 10']
     },
+    dueDate: {
+        type: Date
+    },
     status: {
         type: String,
-        enum: ['pending', 'complete', 'overdue']
+        enum: ['pending', 'started', 'complete', 'overdue']
     },
 }, {minimize: false})
 

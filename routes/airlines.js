@@ -4,8 +4,7 @@
  * Module Dependencies
  */
 const _ = require('lodash'),
-    errors = require('restify-errors'),
-    mongoose = require('mongoose')
+    errors = require('restify-errors')
 
 /**
  * Model Schema
