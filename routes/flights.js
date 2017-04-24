@@ -96,6 +96,7 @@ module.exports = function (server) {
                         day: {$dayOfMonth: '$created'}
                     },
                     avg_price: {$avg: '$fare.total_price'},
+                    low_price: {$min: '$fare.total_price'},
                     created: {$first: '$created'},
                     departureAirport: {$first: '$routes.departureAirport'},
                     arrivalAirport: {$first: '$routes.arrivalAirport'}
@@ -105,7 +106,8 @@ module.exports = function (server) {
                 departureAirport: {$arrayElemAt: ['$departureAirport', 0]},
                 arrivalAirport: {$arrayElemAt: ['$arrivalAirport', 0]},
                 created : '$created',
-                price: '$avg_price',
+                avg_price: '$avg_price',
+                low_price: '$low_price',
                 '_id': 0
             }},
             {$sort: {

@@ -43,7 +43,14 @@ module.exports = function (server) {
     server.post('/login', passport.authenticate('local'), function(req, res) {
 		//user has authenticated correctly thus we create a JWT token
 		let token = jwt.encode({user: req.user}, config.TOKEN_SECRET)
-		res.json({token : token})
+        let user = {
+            id: req.user._id,
+            username: req.user.username,
+            email: req.user.email,
+            fullName: req.user.fullName,
+            createAt: req.user.createAt
+        }
+		res.json({token : token, user : user})
 	})
 
 	/**
