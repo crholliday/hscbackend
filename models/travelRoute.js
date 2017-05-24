@@ -20,7 +20,14 @@ const TravelRouteSchema = new mongoose.Schema({
         type: Number
     },
     fromNow: {
-        type: Number
+        type: Number,
+        default: 0
+    },
+    fromDate: {
+        type: Date
+    },
+    toDate: {
+        type: Date
     },
     isActive: {
         type: Boolean

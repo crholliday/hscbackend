@@ -1,7 +1,6 @@
 'use strict'
 
 let axios = require('axios')
-let flat = require('flat')
 let config = require('../config')
 let _ = require('lodash')
 let moment = require('moment')
@@ -21,8 +20,19 @@ module.exports = {
 
       routes.forEach(function (route) {
 
-        let departureDate = moment().add(route.fromNow, 'd').format('YYYY-MM-DD')
-        let returnDate = moment(departureDate).add(route.durationDays, 'd').format('YYYY-MM-DD')
+        let departureDate
+        if (route.fromNow > 0) {
+           departureDate = moment().add(route.fromNow, 'd').format('YYYY-MM-DD')
+        } else {
+          departureDate = moment(route.fromDate).format('YYYY-MM-DD')
+        }
+
+        let returnDate
+        if (route.fromNow > 0) {
+          returnDate = moment(departureDate).add(route.durationDays, 'd').format('YYYY-MM-DD')
+        } else {
+          returnDate = moment(route.toDate).format('YYYY-MM-DD')
+        }
 
         let params = {
           route: route._id,
