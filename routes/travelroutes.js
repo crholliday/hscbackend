@@ -16,7 +16,7 @@ module.exports = function (server) {
      * List Travel Routes
      */
     server.get('/travel-routes', function (req, res, next) {
-        TravelRoute.apiQuery(req.params, function (err, docs) {
+        TravelRoute.find({}, function (err, docs) {
             if (err) {
                 log.error(err)
                 return next(new errors.InvalidContentError(err.errors.name.message))
