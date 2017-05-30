@@ -36,6 +36,9 @@ module.exports = function (server) {
                 foreignField: '_id',
                 as: 'routes'
             }},
+            {$match: {
+                'routes._id': {$exists: true}
+            }},
             {$group: {
                     _id: {
                         departureAirport: '$routes.departureAirport',
