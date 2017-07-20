@@ -74,7 +74,6 @@ module.exports = function (server) {
         res.set('Content-Type', 'application/json')
         stream.pipe(JSONStream.stringify()).pipe(res)
     })
-
      /**
      * LIST
      * Requires an 'origin' and 'destination' parameter
