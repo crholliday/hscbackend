@@ -26,10 +26,13 @@ module.exports = function (server) {
      /**
      * LIST
      */
-    server.get('/cheap-flight-by-route', function (req, res, next) {
 
-        Flights.aggregate(
-            {$sort: {'fare.total_price': 1}},
+    const JSONStream = require('JSONStream')
+    server.get('/cheap-flight-by-route', function (req, res) {
+        let stream = Flights.aggregate([
+            {$sort: {
+                'fare.total_price': 1
+            }},
             {$lookup: {
                 from: 'travelroutes',
                 localField: 'route',
@@ -40,16 +43,15 @@ module.exports = function (server) {
                 'routes._id': {$exists: true}
             }},
             {$group: {
-                    _id: {
-                        departureAirport: '$routes.departureAirport',
-                        arrivalAirport: '$routes.arrivalAirport',
-                    },
-                    total_price: {$min: '$fare.total_price'},
-                    avg_price: {$avg: '$fare.total_price'},
-                    created: {$first: '$created'},
-                    doc: {$first: '$$ROOT'}
-                }
-            },
+                _id: {
+                    departureAirport: '$routes.departureAirport',
+                    arrivalAirport: '$routes.arrivalAirport',
+                },
+                total_price: {$min: '$fare.total_price'},
+                avg_price: {$avg: '$fare.total_price'},
+                created: {$first: '$created'},
+                doc: {$first: '$$ROOT'}
+            }},
             {$project: {
                 departureAirport: {$arrayElemAt: ['$_id.departureAirport', 0]},
                 arrivalAirport: {$arrayElemAt: ['$_id.arrivalAirport', 0]},
@@ -63,16 +65,14 @@ module.exports = function (server) {
                 'created': 1,
                 'departureAirport': 1,
                 'arrivalAirport': 1
-            }
-        },
-        function(err, cheapFlights){
-            if (err) {
-                log.error(err)
-                return next(new errors.InvalidContentError(err.errors.name.message))
-            }
-            res.send(cheapFlights)
-            next()
-        })
+            }}
+        ])
+        .allowDiskUse(true)
+        .cursor()
+        .exec()
+
+        res.set('Content-Type', 'application/json')
+        stream.pipe(JSONStream.stringify()).pipe(res)
     })
 
      /**
