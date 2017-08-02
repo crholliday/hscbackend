@@ -80,7 +80,7 @@ module.exports = function (server) {
      */
     server.get('/flights-by-endpoints', function (req, res, next) {
 
-        Flights.aggregate(
+        let stream = Flights.aggregate([
             {$lookup: {
                 from: 'travelroutes',
                 localField: 'route',
@@ -116,16 +116,14 @@ module.exports = function (server) {
                 'created': 1,
                 'departureAirport': 1,
                 'arrivalAirport': 1
-            }
-        },
-        function(err, cheapFlights){
-            if (err) {
-                log.error(err)
-                return next(new errors.InvalidContentError(err.errors.name.message))
-            }
-            res.send(cheapFlights)
-            next()
-        })
+            }}
+        ])
+        .allowDiskUse(true)
+        .cursor()
+        .exec()
+
+        res.set('Content-Type', 'application/json')
+        stream.pipe(JSONStream.stringify()).pipe(res)
     })
 
     /**
@@ -133,7 +131,7 @@ module.exports = function (server) {
      */
     server.get('/cheap-flights-by-day', function (req, res, next) {
 
-        Flights.aggregate(
+        let stream = Flights.aggregate([
             {$lookup: {
                 from: 'travelroutes',
                 localField: 'route',
@@ -163,16 +161,14 @@ module.exports = function (server) {
                 'created': 1,
                 'departureAirport': 1,
                 'arrivalAirport': 1
-            }
-        },
-        function(err, cheapFlights){
-            if (err) {
-                log.error(err)
-                return next(new errors.InvalidContentError(err.errors.name.message))
-            }
-            res.send(cheapFlights)
-            next()
-        })
+            }}
+        ])
+        .allowDiskUse(true)
+        .cursor()
+        .exec()
+
+        res.set('Content-Type', 'application/json')
+        stream.pipe(JSONStream.stringify()).pipe(res)
     })
 
     /**
@@ -207,7 +203,7 @@ module.exports = function (server) {
      */
     server.get('/cheap-flights', function (req, res, next) {
 
-        Flights.aggregate(
+        let stream = Flights.aggregate([
             {$sort: {'fare.total_price': 1}},
             {$group: {
                     _id: {
@@ -246,15 +242,14 @@ module.exports = function (server) {
                 'arrivalAirport': 1,
                 'cheap_price': 1,
                 'departureDate': -1}
-            },
-            function(err, cheapFlights){
-                if (err) {
-                    log.error(err)
-                    return next(new errors.InvalidContentError(err.errors.name.message))
-                }
-                res.send(cheapFlights)
-                next()
-            })
+            }
+        ])
+        .allowDiskUse(true)
+        .cursor()
+        .exec()
+
+        res.set('Content-Type', 'application/json')
+        stream.pipe(JSONStream.stringify()).pipe(res)
     })
 
 }
