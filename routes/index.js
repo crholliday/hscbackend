@@ -14,6 +14,7 @@ require('../routes/airlines.js')(server)
 require('../routes/flights')(server)
 require('../routes/todos')(server)
 require('../routes/users')(server)
+require('../routes/crypto')(server)
 
 /**
  * GET covers the root
