@@ -16,7 +16,7 @@ module.exports = function (server) {
      * List Crypto
      */
     server.get('/cryptos', function (req, res, next) {
-        Crypto.apiQuery(req.params, function (err, docs) {
+        Crypto.find({}, function (err, docs) {
             if (err) {
                 log.error(err)
                 return next(new errors.InvalidContentError(err.errors.name.message))
