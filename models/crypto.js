@@ -9,7 +9,7 @@ const CryptoSchema = new mongoose.Schema({
     currency: {
         type: String,
         required: true,
-        enum: ['BTC', 'LTC', 'BCH', 'ETH']
+        enum: ['BTC', 'LTC', 'BCH', 'ETH', 'IOT']
     },
     amount: {
         type: Number,
