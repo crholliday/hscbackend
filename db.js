@@ -8,7 +8,7 @@ db.on('error', function () {
 	log.error('An error occured from the database... ')
 })
 
-db.once('open', function dbOpen() {
+db.once('openUri', function dbOpen() {
 	log.info('Successfully opened the db... ')
 })
 

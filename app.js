@@ -10,7 +10,20 @@ const config        = require('./config'),
       mongoose      = require('mongoose'),
       passport      = require('passport-restify'),
       agenda        = require('./agenda'),
-      zmq           = require('zeromq')
+      zmq           = require('zeromq'),
+      corsMiddleware = require('restify-cors-middleware')
+
+const cors = corsMiddleware({
+    preflightMaxAge: 5, //Optional
+    origins: ['http://www.hotsexcoffee.com',
+              'http://hotsexcoffee.com',
+              'http://www.hotsexcoffee.com:8080',
+              'https://www.hotsexcoffee.com:443',
+              'https://hotsexcoffee.com:443',
+              'http://localhost:8080'],
+    allowHeaders: ['API-Token'],
+    exposeHeaders: ['API-Token-Expiry']
+})
 
 /**
  * Logging
@@ -45,6 +58,8 @@ server.use(restify.plugins.acceptParser(server.acceptable))
 server.use(restify.plugins.queryParser({mapParams: true}))
 server.use(restify.plugins.fullResponse())
 server.use(passport.initialize())
+server.pre(cors.preflight)
+server.use(cors.actual)
 
 /**
  * Error Handling
