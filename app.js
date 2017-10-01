@@ -9,7 +9,8 @@ const config        = require('./config'),
       bunyanWinston = require('bunyan-winston-adapter'),
       mongoose      = require('mongoose'),
       passport      = require('passport-restify'),
-      agenda        = require('./agenda')
+      agenda        = require('./agenda'),
+      zmq           = require('zeromq')
 
 /**
  * Logging
@@ -30,9 +31,10 @@ global.log = new winston.Logger({
  * Initialize Server
  */
 global.server = restify.createServer({
-    name    : config.name,
-    version : config.version,
-    log     : bunyanWinston.createAdapter(log),
+    name            : config.name,
+    version         : config.version,
+    log             : bunyanWinston.createAdapter(log),
+    socketio        : true
 })
 
 /**
@@ -51,6 +53,45 @@ server.on('uncaughtException', (req, res, route, err) => {
     log.error(err.stack)
     res.send(err)
 })
+
+var io = require('socket.io').listen(server)
+
+io.on('connection', function (skt) {
+    log.info('Somebody connected to the socket...')
+    skt.emit('info', {hello: 'world'})
+    // subber.js
+    var sock = zmq.socket('sub')
+
+    sock.connect('tcp://' + config.zmq_url)
+    sock.subscribe('')
+    log.info('Subscriber connected to port 5556')
+
+    sock.on('message', function(topic) {
+        var tp = topic.toString()
+        var arr = tp.split(' ')
+
+        if (arr[0] === 'tx') {
+            let msg = {
+                hash: arr[1],
+                'address': arr[2],
+                'amount': arr[3],
+                'tag': arr[4],
+                'timestamp': arr[5],
+                'currentIndex': arr[6],
+                'lastIndex': arr[7],
+                'bundle': arr[8],
+                'trunk': arr[9],
+                'branch': arr[10],
+                'arrivalDate': arr[11]
+            }
+            skt.emit(arr[0], msg)
+        } else {
+            skt.emit(arr[0], arr)
+        }
+        
+        // log.info(arr)
+    })
+  })
 
 /**
  * Lift Server, Connect to DB & Bind Routes
