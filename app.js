@@ -21,7 +21,7 @@ const cors = corsMiddleware({
               'https://www.hotsexcoffee.com:443',
               'https://hotsexcoffee.com:443',
               'http://localhost:8080'],
-    allowHeaders: ['API-Token'],
+    allowHeaders: ['API-Token', 'X-IOTA-API-Version'],
     exposeHeaders: ['API-Token-Expiry']
 })
 
