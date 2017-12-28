@@ -19,7 +19,7 @@ module.exports = function (server) {
     server.post('/flight', function (req, res, next) {
 
         flights.loadFlights()
-        res.send('Flights loaded...', 201)
+        res.send(201, 'Flights loaded...' )
         next()
     })
 

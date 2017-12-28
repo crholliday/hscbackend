@@ -103,7 +103,7 @@ io.on('connection', function (skt) {
         } else {
             skt.emit(arr[0], arr)
         }
-        
+
         // log.info(arr)
     })
   })

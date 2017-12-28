@@ -17,6 +17,7 @@ module.exports = {
 
     TravelRoutes.find({isActive: true}, function (err, routes) {
       log.info('Picked up ' + routes.length + ' Travel Routes...')
+      log.debug(routes)
 
       routes.forEach(function (route) {
 
